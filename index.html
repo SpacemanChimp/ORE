@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EVE Ore/Ice Harvesting Rate Calculator</title>
+  <meta name="description" content="Web-based ore/ice harvesting rate + ISK value calculator for EVE Online (raw vs reprocessed) using Jita prices." />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header class="page-header">
+    <div class="wrap">
+      <h1>EVE Ore/Ice Harvesting Rate Calculator</h1>
+      <p class="subtitle">
+        Enter your cycle time + duration. Choose an ore/ice. Get totals in raw and reprocessed form, priced at Jita 4-4.
+      </p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <h2>Inputs</h2>
+
+      <form id="calcForm" class="grid" autocomplete="off">
+        <label>
+          Yield per cycle (m³)
+          <input id="yieldPerCycle" type="number" min="0" step="0.01" value="1000" />
+          <small>Default is 1000 m³ per cycle.</small>
+        </label>
+
+        <label>
+          Cycle time (seconds)
+          <input id="cycleTimeSeconds" type="number" min="0.1" step="0.1" value="92.2" />
+          <small>Example: 92.2</small>
+        </label>
+
+        <label>
+          Duration (minutes)
+          <input id="durationMinutes" type="number" min="0" step="1" value="15" />
+          <small>Rounds <b>down</b> to full cycles.</small>
+        </label>
+
+        <label>
+          Material (name)
+          <input id="materialName" list="materialSuggestions" placeholder="Veldspar, Blue Ice, ..." />
+          <datalist id="materialSuggestions"></datalist>
+          <small>Pick from suggestions or type an exact in-game name.</small>
+        </label>
+
+        <label>
+          Material Type ID (optional)
+          <input id="materialTypeId" type="number" min="1" step="1" placeholder="e.g. 1230" />
+          <small>If filled, overrides the name and skips name→ID lookup.</small>
+        </label>
+
+        <label>
+          Reprocessing yield (%)
+          <input id="reprocessYieldPct" type="number" min="0" max="100" step="0.1" value="100" />
+          <small>100% = “perfect” yield. This tool does not model skills/taxes.</small>
+        </label>
+
+        <label>
+          Price source
+          <select id="priceSource">
+            <option value="fuzzwork" selected>Fuzzwork aggregates (fast)</option>
+            <option value="esi">ESI region orders (slow / heavy)</option>
+          </select>
+          <small>
+            Fuzzwork is an orderbook snapshot updated ~every 30 minutes. ESI is live, but can take many requests for common items.
+          </small>
+        </label>
+
+        <div class="actions">
+          <button id="calcBtn" type="submit">Calculate</button>
+          <button id="shareBtn" type="button" class="secondary">Copy sharable link</button>
+          <button id="resetBtn" type="button" class="secondary">Reset</button>
+        </div>
+      </form>
+
+      <div id="status" class="status" aria-live="polite"></div>
+    </section>
+
+    <section class="card">
+      <h2>Summary</h2>
+      <div id="summary" class="summary-grid">
+        <div class="placeholder">Enter inputs and click <b>Calculate</b>.</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Raw output</h2>
+      <div class="table-wrap">
+        <table class="table" id="rawTable">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th class="num">Type ID</th>
+              <th class="num">Unit volume (m³)</th>
+              <th class="num">Units</th>
+              <th class="num">Jita sell (ISK/unit)</th>
+              <th class="num">Total (ISK)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="6" class="muted">No calculation yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Reprocessed output</h2>
+      <div class="table-wrap">
+        <table class="table" id="reprocessTable">
+          <thead>
+            <tr>
+              <th>Material</th>
+              <th class="num">Type ID</th>
+              <th class="num">Qty</th>
+              <th class="num">Jita sell (ISK/unit)</th>
+              <th class="num">Total (ISK)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="5" class="muted">No calculation yet.</td></tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4" class="num"><b>Reprocessed total</b></td>
+              <td class="num" id="reprocessTotalCell">—</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="compare" id="compareBox"></div>
+    </section>
+
+    <section class="card small">
+      <h2>Notes & data sources</h2>
+      <ul>
+        <li><b>Jita hub</b>: Jita IV - Moon 4 - Caldari Navy Assembly Plant (station ID <code>60003760</code>).</li>
+        <li><b>Market prices</b>:
+          <ul>
+            <li><b>Fuzzwork aggregates</b> gives min sell / max buy stats per type for a station/region, based on processed orderbook snapshots.</li>
+            <li><b>ESI region orders</b> is official, but requires paging through many results for highly traded items.</li>
+          </ul>
+        </li>
+        <li><b>Reprocessing outputs</b>: pulled from <code>type_materials</code> on the EVE Ref reference data API.</li>
+        <li>This tool assumes your harvester pulls <b>m³ per cycle</b>. If you mine in units per cycle, adjust the yield per cycle accordingly.</li>
+      </ul>
+    </section>
+
+    <footer class="footer">
+      <div>
+        Built as a static site for GitHub Pages. No login required.
+      </div>
+    </footer>
+  </main>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
